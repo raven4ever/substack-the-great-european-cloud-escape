@@ -1,0 +1,1 @@
+data "scaleway_config" "main" {}

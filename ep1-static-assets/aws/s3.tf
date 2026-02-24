@@ -14,6 +14,12 @@ resource "aws_s3_bucket_acl" "main" {
   acl    = "public-read"
 }
 
+# set the bucket policy
+resource "aws_s3_bucket_policy" "main" {
+  bucket = aws_s3_bucket.main.bucket
+  policy = data.aws_iam_policy_document.origin_bucket_policy.json
+}
+
 # upload the files
 resource "aws_s3_object" "website_files" {
   for_each     = fileset("${path.module}/../website", "**")

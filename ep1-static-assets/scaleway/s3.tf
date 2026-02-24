@@ -6,7 +6,7 @@ resource "scaleway_object_bucket" "main" {
   versioning {
     enabled = true
   }
-  
+
   tags = {
     Project = "my-super-super-uber-scaleway-website"
   }
