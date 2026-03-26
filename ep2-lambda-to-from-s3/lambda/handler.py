@@ -1,6 +1,7 @@
 import json
 import os
 from io import BytesIO
+from urllib.parse import unquote_plus
 
 import boto3
 from PIL import Image
@@ -52,7 +53,7 @@ def aws_handler(event, context):
 
     for record in event["Records"]:
         source_bucket = record["s3"]["bucket"]["name"]
-        key = record["s3"]["object"]["key"]
+        key = unquote_plus(record["s3"]["object"]["key"])
         result = resize_image(s3, source_bucket, key)
         print(f"Created thumbnail: s3://{result['bucket']}/{result['key']}")
 
@@ -62,7 +63,7 @@ def aws_handler(event, context):
 # --- Scaleway Serverless handler ---
 
 def scaleway_handler(event, context):
-    """Triggered by SQS/NATS message containing bucket and key."""
+    """Triggered by SQS message containing bucket and key."""
     s3 = get_s3_client()
 
     body = event["body"]

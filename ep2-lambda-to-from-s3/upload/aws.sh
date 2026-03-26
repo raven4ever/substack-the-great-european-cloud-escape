@@ -9,13 +9,16 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TF_DIR="${SCRIPT_DIR}/../aws"
+
 IMAGE_FILE="$1"
 IMAGE_KEY="$(basename "$IMAGE_FILE")"
 THUMB_KEY="thumbnails/${IMAGE_KEY}"
 
 # read bucket names from terraform output
-INPUT_BUCKET=$(terraform -chdir=../aws output -raw input_bucket)
-OUTPUT_BUCKET=$(terraform -chdir=../aws output -raw output_bucket)
+INPUT_BUCKET=$(terraform -chdir="$TF_DIR" output -raw input_bucket)
+OUTPUT_BUCKET=$(terraform -chdir="$TF_DIR" output -raw output_bucket)
 
 echo "Uploading ${IMAGE_FILE} to s3://${INPUT_BUCKET}/${IMAGE_KEY}..."
 aws s3 cp "$IMAGE_FILE" "s3://${INPUT_BUCKET}/${IMAGE_KEY}"

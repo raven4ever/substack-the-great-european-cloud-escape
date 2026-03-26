@@ -19,7 +19,7 @@ resource "scaleway_mnq_sqs_credentials" "publisher" {
   name       = "image-resizer-publisher"
 
   permissions {
-    can_manage  = false
+    can_manage  = true
     can_receive = false
     can_publish = true
   }
@@ -29,6 +29,6 @@ resource "scaleway_mnq_sqs_credentials" "publisher" {
 resource "scaleway_mnq_sqs_queue" "images" {
   project_id = scaleway_mnq_sqs.main.project_id
   name       = "image-resize-queue"
-  access_key = scaleway_mnq_sqs_credentials.function.access_key
-  secret_key = scaleway_mnq_sqs_credentials.function.secret_key
+  access_key = scaleway_mnq_sqs_credentials.publisher.access_key
+  secret_key = scaleway_mnq_sqs_credentials.publisher.secret_key
 }

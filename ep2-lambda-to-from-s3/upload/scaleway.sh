@@ -9,17 +9,20 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TF_DIR="${SCRIPT_DIR}/../scaleway"
+
 IMAGE_FILE="$1"
 IMAGE_KEY="$(basename "$IMAGE_FILE")"
 THUMB_KEY="thumbnails/${IMAGE_KEY}"
 
 # read from terraform output
-INPUT_BUCKET=$(terraform -chdir=../scaleway output -raw input_bucket)
-OUTPUT_BUCKET=$(terraform -chdir=../scaleway output -raw output_bucket)
-SQS_QUEUE_URL=$(terraform -chdir=../scaleway output -raw sqs_queue_url)
-SQS_ENDPOINT=$(terraform -chdir=../scaleway output -raw sqs_endpoint)
-SQS_ACCESS_KEY=$(terraform -chdir=../scaleway output -raw sqs_publisher_access_key)
-SQS_SECRET_KEY=$(terraform -chdir=../scaleway output -raw sqs_publisher_secret_key)
+INPUT_BUCKET=$(terraform -chdir="$TF_DIR" output -raw input_bucket)
+OUTPUT_BUCKET=$(terraform -chdir="$TF_DIR" output -raw output_bucket)
+SQS_QUEUE_URL=$(terraform -chdir="$TF_DIR" output -raw sqs_queue_url)
+SQS_ENDPOINT=$(terraform -chdir="$TF_DIR" output -raw sqs_endpoint)
+SQS_ACCESS_KEY=$(terraform -chdir="$TF_DIR" output -raw sqs_publisher_access_key)
+SQS_SECRET_KEY=$(terraform -chdir="$TF_DIR" output -raw sqs_publisher_secret_key)
 
 S3_ENDPOINT="https://s3.fr-par.scw.cloud"
 

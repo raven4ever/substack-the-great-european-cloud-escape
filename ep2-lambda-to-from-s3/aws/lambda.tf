@@ -1,25 +1,21 @@
-resource "null_resource" "lambda_package" {
-  triggers = {
-    requirements = filemd5(format("%s/requirements.txt", local.lambda_source))
-    handler      = filemd5(format("%s/handler.py", local.lambda_source))
-  }
+resource "terraform_data" "lambda_package" {
+  triggers_replace = [
+    filemd5(format("%s/requirements.txt", local.lambda_source)),
+    filemd5(format("%s/handler.py", local.lambda_source)),
+  ]
 
   provisioner "local-exec" {
     command = <<-EOT
-      cd ${local.lambda_source}
-      pip install -r requirements.txt --target ./package --platform manylinux2014_x86_64 --only-binary=:all: --quiet
-      cp handler.py package/
-      cd package
-      zip -r ${abspath(local.lambda_package)} . --quiet
-      cd ..
+      cd ${abspath(local.lambda_source)}
+      docker run --rm --platform linux/amd64 -v $(pwd):/var/task --workdir /var/task \
+        public.ecr.aws/sam/build-python3.13:latest \
+        pip install -r requirements.txt --target ./package --quiet
+      cd package && zip -r ${abspath(local.lambda_package)} . -q
+      cd ${abspath(local.lambda_source)}
+      zip ${abspath(local.lambda_package)} handler.py -q
       rm -rf package
     EOT
   }
-}
-
-data "local_file" "lambda_zip" {
-  filename   = local.lambda_package
-  depends_on = [null_resource.lambda_package]
 }
 
 resource "aws_lambda_function" "resizer" {
@@ -30,12 +26,12 @@ resource "aws_lambda_function" "resizer" {
   timeout          = 30
   memory_size      = 256
   filename         = local.lambda_package
-  source_code_hash = data.local_file.lambda_zip.content_base64sha256
+  source_code_hash = terraform_data.lambda_package.id
 
   environment {
     variables = {
-      DEST_BUCKET     = aws_s3_bucket.output.id
-      THUMBNAIL_WIDTH = "200"
+      DEST_BUCKET      = aws_s3_bucket.output.id
+      THUMBNAIL_WIDTH  = "200"
       THUMBNAIL_HEIGHT = "200"
     }
   }
@@ -44,7 +40,7 @@ resource "aws_lambda_function" "resizer" {
     Project = "ep2-lambda-to-from-s3"
   }
 
-  depends_on = [null_resource.lambda_package]
+  depends_on = [terraform_data.lambda_package]
 }
 
 resource "aws_lambda_permission" "s3" {

@@ -44,3 +44,6 @@ terraform.rc
 # planout
 
 .terraform*
+
+package.zip
+thumb_test-image.jpg
