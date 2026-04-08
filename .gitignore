@@ -47,3 +47,5 @@ terraform.rc
 
 package.zip
 thumb_test-image.jpg
+
+__pycache__

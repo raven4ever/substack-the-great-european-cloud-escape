@@ -1,0 +1,12 @@
+[Unit]
+Description=Super Duper APP
+After=network.target
+
+[Service]
+WorkingDirectory=/app
+ExecStart=/app/venv/bin/uvicorn app:app --host 0.0.0.0 --port 80
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
