@@ -1,0 +1,6 @@
+apiVersion: v2
+name: my-animalz
+description: Deploys the my-animalz Spring Boot app to EKS with IRSA for S3 and a Gateway API route fronted by an ALB.
+type: application
+version: 0.1.0
+appVersion: "0.0.1-SNAPSHOT"

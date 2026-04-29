@@ -1,0 +1,44 @@
+image:
+  repository: ""
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: my-animalz
+  roleArn: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+env:
+  datasource:
+    url: ""
+    username: masteruser
+    password: ""
+  jpa:
+    ddlAuto: update
+  app:
+    bucketName: ""
+    randomImageUrl: "https://picsum.photos/400/300"
+
+extraEnv: []
+
+probes:
+  readiness:
+    path: /actuator/health/readiness
+  liveness:
+    path: /actuator/health/liveness

@@ -49,3 +49,5 @@ package.zip
 thumb_test-image.jpg
 
 __pycache__
+
+.kube/

@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: my-animalz
+  cloud:
+    aws:
+      s3:
+        endpoint: ${AWS_S3_ENDPOINT:}
+        path-style-access-enabled: true
+
+app:
+  bucket-name: ${APP_BUCKET_NAME:animal-images}
+  random-image-url: ${APP_RANDOM_IMAGE_URL:https://picsum.photos/400/300}
