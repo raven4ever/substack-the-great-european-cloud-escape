@@ -15,6 +15,12 @@ terraform {
     kubernetes = {
       source = "hashicorp/kubernetes"
     }
+    time = {
+      source = "hashicorp/time"
+    }
+    local = {
+      source = "hashicorp/local"
+    }
   }
 }
 
@@ -23,7 +29,7 @@ provider "scaleway" {
 
 provider "docker" {
   registry_auth {
-    address  = scaleway_registry_namespace.app.endpoint
+    address  = split("/", scaleway_registry_namespace.app.endpoint)[0]
     username = "nologin"
     password = scaleway_iam_api_key.registry.secret_key
   }

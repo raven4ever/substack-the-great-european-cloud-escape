@@ -1,21 +1,26 @@
+resource "local_file" "kubeconfig" {
+  filename        = format("%s/.kube/config", abspath(path.module))
+  content         = scaleway_k8s_cluster.app.kubeconfig[0].config_file
+  file_permission = "0600"
+}
+
 resource "null_resource" "wait_for_lb" {
   triggers = {
     release    = helm_release.app.id
-    kubeconfig = format("%s/.kube/config-ep4-scw", abspath(path.module))
+    kubeconfig = local_file.kubeconfig.filename
     namespace  = local.app_sa_namespace
     service    = format("%s-my-animalz", local.app_sa_name)
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
-      mkdir -p $(dirname ${self.triggers.kubeconfig})
-      cat > ${self.triggers.kubeconfig} <<'KUBECONFIG'
-      ${scaleway_k8s_cluster.app.kubeconfig[0].config_file}
-      KUBECONFIG
-      KUBECONFIG=${self.triggers.kubeconfig} \
-        kubectl wait --for=jsonpath='{.status.loadBalancer.ingress[0].hostname}' \
-        service/${self.triggers.service} -n ${self.triggers.namespace} --timeout=5m
-    EOT
+    environment = {
+      KUBECONFIG = self.triggers.kubeconfig
+    }
+    command = format(
+      "kubectl wait --for=jsonpath='{.status.loadBalancer.ingress[0].hostname}' service/%s -n %s --timeout=5m",
+      self.triggers.service,
+      self.triggers.namespace
+    )
   }
 }
 

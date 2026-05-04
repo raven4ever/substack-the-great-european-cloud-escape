@@ -19,7 +19,7 @@ resource "helm_release" "app" {
       value = local.app_sa_name
     },
     {
-      name  = "env.datasource.url"
+      name = "env.datasource.url"
       value = format(
         "jdbc:postgresql://%s:%d/%s",
         scaleway_rdb_instance.app.private_network[0].ip,
@@ -46,6 +46,7 @@ resource "helm_release" "app" {
     {
       name  = "service.annotations.service\\.beta\\.kubernetes\\.io/scw-loadbalancer-use-hostname"
       value = "true"
+      type  = "string"
     },
     {
       name  = "extraEnv[0].name"
@@ -92,5 +93,6 @@ resource "helm_release" "app" {
   depends_on = [
     scaleway_k8s_pool.app,
     docker_registry_image.app,
+    scaleway_rdb_privilege.app_master
   ]
 }

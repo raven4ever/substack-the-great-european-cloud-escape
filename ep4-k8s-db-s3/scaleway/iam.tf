@@ -13,7 +13,12 @@ resource "scaleway_iam_policy" "app_object_storage" {
   }
 }
 
+resource "time_rotating" "iam_keys" {
+  rotation_years = 1
+}
+
 resource "scaleway_iam_api_key" "app" {
   application_id = scaleway_iam_application.app.id
   description    = "Used by the my-animalz Spring Boot pod to access Scaleway Object Storage"
+  expires_at     = time_rotating.iam_keys.rotation_rfc3339
 }

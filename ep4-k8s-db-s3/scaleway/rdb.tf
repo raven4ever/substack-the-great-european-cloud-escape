@@ -1,6 +1,6 @@
 resource "random_password" "db_master" {
   length  = 24
-  special = false
+  special = true
 }
 
 resource "scaleway_rdb_instance" "app" {
@@ -23,4 +23,11 @@ resource "scaleway_rdb_instance" "app" {
 resource "scaleway_rdb_database" "app" {
   instance_id = scaleway_rdb_instance.app.id
   name        = "demo"
+}
+
+resource "scaleway_rdb_privilege" "app_master" {
+  instance_id   = scaleway_rdb_instance.app.id
+  user_name     = scaleway_rdb_instance.app.user_name
+  database_name = scaleway_rdb_database.app.name
+  permission    = "all"
 }

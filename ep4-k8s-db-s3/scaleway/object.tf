@@ -3,7 +3,8 @@ resource "random_id" "bucket_suffix" {
 }
 
 resource "scaleway_object_bucket" "animal_images" {
-  name = format("%s-animal-images-%s", local.app_name, random_id.bucket_suffix.hex)
+  name          = format("%s-animal-images-%s", local.app_name, random_id.bucket_suffix.hex)
+  force_destroy = true
   tags = {
     Project = local.project
   }

@@ -22,4 +22,5 @@ resource "scaleway_iam_policy" "registry_push" {
 resource "scaleway_iam_api_key" "registry" {
   application_id = scaleway_iam_application.registry.id
   description    = "Used by Terraform to push images to the Scaleway Container Registry"
+  expires_at     = time_rotating.iam_keys.rotation_rfc3339
 }
