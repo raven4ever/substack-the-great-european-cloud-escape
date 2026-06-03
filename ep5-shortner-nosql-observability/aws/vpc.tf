@@ -135,23 +135,3 @@ resource "aws_route_table_association" "private_b" {
   subnet_id      = aws_subnet.private_b.id
   route_table_id = aws_route_table.private.id
 }
-
-# ECS Express task SG. Egress all (Mongo / OTLP / image pulls via NAT or VPCe).
-# Ingress: none — Express Mode auto-manages ALB→task on its own SG.
-resource "aws_security_group" "app" {
-  name        = format("%s-app", local.app_name)
-  description = "ECS Express task SG"
-  vpc_id      = aws_vpc.app.id
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name    = format("%s-app", local.app_name)
-    Project = local.project
-  }
-}
