@@ -1,0 +1,30 @@
+package templates
+
+import (
+	"fmt"
+	"time"
+
+	"shortner-app/internal/storage"
+)
+
+// LinkRow renders a single table row for a shortened link. It is reused both
+// inside the home and admin tables and as the htmx fragment returned after a
+// successful POST /shorten — that is why it is a standalone component.
+//
+// The click-count cell polls /clicks/:slug every 3 seconds via htmx so the
+// figure updates while the page is open (e.g. while another tab is exercising
+// the redirect). Polling traffic is intentional: it gives the observability
+// dashboards a baseline read load to chart.
+templ LinkRow(link storage.Link) {
+	<tr>
+		<td class="slug-cell"><a href={ templ.SafeURL("/r/" + link.Slug) } target="_blank">{ link.Slug }</a></td>
+		<td class="url-cell">{ link.URL }</td>
+		<td>{ link.ExpiresAt.UTC().Format(time.RFC3339) }</td>
+		<td
+			hx-get={ "/clicks/" + link.Slug }
+			hx-trigger="every 3s"
+			hx-swap="innerHTML"
+		>{ fmt.Sprint(link.ClickCount) }</td>
+		<td><a href={ templ.SafeURL("/stats/" + link.Slug) }>stats</a></td>
+	</tr>
+}

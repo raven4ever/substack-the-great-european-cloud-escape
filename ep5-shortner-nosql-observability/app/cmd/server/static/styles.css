@@ -1,0 +1,107 @@
+/* Page-level layout. Material Web Components handle their own styling — this
+   is just spacing, the topbar, and table affordances. */
+
+body {
+    font-family: 'Roboto', system-ui, sans-serif;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px;
+    color: #222;
+    background: #fafafa;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+}
+
+.topbar h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.topbar nav a {
+    margin-left: 16px;
+    color: #1976d2;
+    text-decoration: none;
+}
+
+.topbar nav a:hover {
+    text-decoration: underline;
+}
+
+main section {
+    margin-bottom: 32px;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+form md-outlined-text-field {
+    flex: 1 1 320px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+th {
+    font-weight: 500;
+    color: #555;
+}
+
+.slug-cell {
+    font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+}
+
+.url-cell {
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.muted {
+    color: #666;
+}
+
+.card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px;
+    background: #fff;
+}
+
+.stats-list {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 16px;
+    margin: 16px 0;
+}
+
+.stats-list dt {
+    font-weight: 500;
+    color: #555;
+}
+
+.stats-list dd {
+    margin: 0;
+}

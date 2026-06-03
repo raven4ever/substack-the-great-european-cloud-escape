@@ -1,0 +1,32 @@
+package templates
+
+import (
+	"fmt"
+
+	"shortner-app/internal/storage"
+)
+
+// Admin lists every link the store knows about. Same row shape as Home, but
+// without the shorten form.
+templ Admin(links []storage.Link) {
+	<section class="admin-section">
+		<h2>All links</h2>
+		<p class="muted">{ fmt.Sprintf("%d links", len(links)) }</p>
+		<table id="links-table">
+			<thead>
+				<tr>
+					<th>Slug</th>
+					<th>URL</th>
+					<th>Expires</th>
+					<th>Clicks</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, l := range links {
+					@LinkRow(l)
+				}
+			</tbody>
+		</table>
+	</section>
+}

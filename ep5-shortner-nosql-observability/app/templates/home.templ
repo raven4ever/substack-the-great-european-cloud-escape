@@ -1,0 +1,106 @@
+package templates
+
+import (
+	"time"
+
+	"shortner-app/internal/storage"
+)
+
+// ttlPreset normalises an arbitrary configured DefaultTTL into one of the
+// values we surface in the UI. Anything that does not exactly match a preset
+// is reported as "24h" so the form always renders with one option selected.
+func ttlPreset(d time.Duration) string {
+	switch d {
+	case time.Hour:
+		return "1h"
+	case 6 * time.Hour:
+		return "6h"
+	case 24 * time.Hour:
+		return "24h"
+	case 7 * 24 * time.Hour:
+		return "7d"
+	case 30 * 24 * time.Hour:
+		return "30d"
+	default:
+		return "24h"
+	}
+}
+
+// Home renders the homepage: a shorten form bound to htmx and a table of the
+// most recent links the store knows about. The `recent` slice is what the
+// store returned via List(); `defaultTTL` is the configured default used to
+// pre-select the matching TTL option in the dropdown.
+templ Home(recent []storage.Link, defaultTTL time.Duration) {
+	<section class="form-section">
+		<form hx-post="/shorten" hx-target="#links-tbody" hx-swap="afterbegin" hx-on::after-request="this.reset()">
+			<md-outlined-text-field name="url" label="URL to shorten" type="url" required></md-outlined-text-field>
+			<md-outlined-select name="ttl" label="Expires after">
+				if ttlPreset(defaultTTL) == "1h" {
+					<md-select-option value="1h" selected>
+						<div slot="headline">1 hour</div>
+					</md-select-option>
+				} else {
+					<md-select-option value="1h">
+						<div slot="headline">1 hour</div>
+					</md-select-option>
+				}
+				if ttlPreset(defaultTTL) == "6h" {
+					<md-select-option value="6h" selected>
+						<div slot="headline">6 hours</div>
+					</md-select-option>
+				} else {
+					<md-select-option value="6h">
+						<div slot="headline">6 hours</div>
+					</md-select-option>
+				}
+				if ttlPreset(defaultTTL) == "24h" {
+					<md-select-option value="24h" selected>
+						<div slot="headline">24 hours</div>
+					</md-select-option>
+				} else {
+					<md-select-option value="24h">
+						<div slot="headline">24 hours</div>
+					</md-select-option>
+				}
+				if ttlPreset(defaultTTL) == "7d" {
+					<md-select-option value="7d" selected>
+						<div slot="headline">7 days</div>
+					</md-select-option>
+				} else {
+					<md-select-option value="7d">
+						<div slot="headline">7 days</div>
+					</md-select-option>
+				}
+				if ttlPreset(defaultTTL) == "30d" {
+					<md-select-option value="30d" selected>
+						<div slot="headline">30 days</div>
+					</md-select-option>
+				} else {
+					<md-select-option value="30d">
+						<div slot="headline">30 days</div>
+					</md-select-option>
+				}
+			</md-outlined-select>
+			<md-filled-button type="submit">Shorten</md-filled-button>
+		</form>
+	</section>
+	<section class="recent-section">
+		<h2>Recent links</h2>
+		<table id="links-table">
+			<thead>
+				<tr>
+					<th>Slug</th>
+					<th>URL</th>
+					<th>Expires</th>
+					<th>Clicks</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="links-tbody">
+				for _, l := range recent {
+					@LinkRow(l)
+				}
+			</tbody>
+		</table>
+	</section>
+}

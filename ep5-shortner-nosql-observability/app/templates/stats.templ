@@ -1,0 +1,34 @@
+package templates
+
+import (
+	"fmt"
+	"time"
+
+	"shortner-app/internal/storage"
+)
+
+// Stats renders the per-link details page: large slug + original URL, the
+// running click count, and lifecycle timestamps.
+templ Stats(link storage.Link) {
+	<section class="stats-section">
+		<div class="card">
+			<h2 class="slug-cell">{ link.Slug }</h2>
+			<p class="url-cell"><a href={ templ.SafeURL(link.URL) } target="_blank">{ link.URL }</a></p>
+			<dl class="stats-list">
+				<dt>Clicks</dt>
+				<dd
+					hx-get={ "/clicks/" + link.Slug }
+					hx-trigger="every 3s"
+					hx-swap="innerHTML"
+				>{ fmt.Sprint(link.ClickCount) }</dd>
+				<dt>Created</dt>
+				<dd>{ link.CreatedAt.UTC().Format(time.RFC3339) }</dd>
+				<dt>Expires</dt>
+				<dd>{ link.ExpiresAt.UTC().Format(time.RFC3339) }</dd>
+				<dt>ID</dt>
+				<dd class="slug-cell">{ link.ID }</dd>
+			</dl>
+			<p><a href="/">← back home</a></p>
+		</div>
+	</section>
+}

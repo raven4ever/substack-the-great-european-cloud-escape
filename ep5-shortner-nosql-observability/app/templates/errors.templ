@@ -1,0 +1,15 @@
+package templates
+
+// LinkError renders a friendly full-page error using the same `.card` styling
+// as the stats page. Used by handlers that resolve a slug and find it
+// missing or expired. The actual HTTP status code (404 / 410) is set by the
+// handler — this template only renders the body.
+templ LinkError(headline, message string) {
+	<section class="error-section">
+		<div class="card">
+			<h2>{ headline }</h2>
+			<p>{ message }</p>
+			<p><a href="/">← back home</a></p>
+		</div>
+	</section>
+}
