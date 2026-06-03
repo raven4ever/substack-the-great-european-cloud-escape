@@ -105,10 +105,16 @@ resource "aws_ecs_express_gateway_service" "app" {
     }
   }
 
-  # Express Mode owns task networking. Declaring security_groups breaks the
-  # provider response shape (auto-attaches ALB SG, length 1→2). Subnets-only.
+  # Express Mode owns task networking. Provider treats security_groups as
+  # Computed: first plan = null, post-apply AWS returns the auto-attached SG.
+  # ignore_changes on the whole block absorbs the drift. Subnet changes also
+  # ignored post-create (acceptable — subnets stable after deploy).
   network_configuration {
     subnets = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+  }
+
+  lifecycle {
+    ignore_changes = [network_configuration]
   }
 
   scaling_target {
