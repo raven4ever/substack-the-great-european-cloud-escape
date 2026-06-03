@@ -1,13 +1,13 @@
 resource "aws_security_group" "vpce" {
   name        = format("%s-vpce", local.app_name)
-  description = "HTTPS from VPC CIDR to interface VPC endpoints"
+  description = "HTTPS from ECS task SG to interface VPC endpoints"
   vpc_id      = aws_vpc.app.id
 
   ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.app.cidr_block]
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app.id]
   }
 
   egress {
