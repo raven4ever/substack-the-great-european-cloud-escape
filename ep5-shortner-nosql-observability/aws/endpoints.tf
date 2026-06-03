@@ -25,7 +25,7 @@ resource "aws_security_group" "vpce" {
 
 resource "aws_vpc_endpoint" "dynamodb" {
   vpc_id            = aws_vpc.app.id
-  service_name      = format("com.amazonaws.%s.dynamodb", data.aws_region.current.id)
+  service_name      = format("com.amazonaws.%s.dynamodb", data.aws_region.current.region)
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_route_table.private.id]
 
@@ -38,7 +38,7 @@ resource "aws_vpc_endpoint" "dynamodb" {
 # S3 gateway endpoint is required for ECR layer pulls — ECR stores image layers in S3.
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.app.id
-  service_name      = format("com.amazonaws.%s.s3", data.aws_region.current.id)
+  service_name      = format("com.amazonaws.%s.s3", data.aws_region.current.region)
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_route_table.private.id]
 
@@ -50,7 +50,7 @@ resource "aws_vpc_endpoint" "s3" {
 
 resource "aws_vpc_endpoint" "ecr_api" {
   vpc_id              = aws_vpc.app.id
-  service_name        = format("com.amazonaws.%s.ecr.api", data.aws_region.current.id)
+  service_name        = format("com.amazonaws.%s.ecr.api", data.aws_region.current.region)
   vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.vpce.id]
@@ -64,7 +64,7 @@ resource "aws_vpc_endpoint" "ecr_api" {
 
 resource "aws_vpc_endpoint" "ecr_dkr" {
   vpc_id              = aws_vpc.app.id
-  service_name        = format("com.amazonaws.%s.ecr.dkr", data.aws_region.current.id)
+  service_name        = format("com.amazonaws.%s.ecr.dkr", data.aws_region.current.region)
   vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.vpce.id]
@@ -78,7 +78,7 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
 
 resource "aws_vpc_endpoint" "logs" {
   vpc_id              = aws_vpc.app.id
-  service_name        = format("com.amazonaws.%s.logs", data.aws_region.current.id)
+  service_name        = format("com.amazonaws.%s.logs", data.aws_region.current.region)
   vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.vpce.id]
@@ -92,7 +92,7 @@ resource "aws_vpc_endpoint" "logs" {
 
 resource "aws_vpc_endpoint" "xray" {
   vpc_id              = aws_vpc.app.id
-  service_name        = format("com.amazonaws.%s.xray", data.aws_region.current.id)
+  service_name        = format("com.amazonaws.%s.xray", data.aws_region.current.region)
   vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.vpce.id]

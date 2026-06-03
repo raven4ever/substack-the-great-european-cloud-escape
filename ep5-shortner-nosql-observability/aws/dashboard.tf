@@ -4,7 +4,7 @@
 
 locals {
   dashboard_log_group = aws_cloudwatch_log_group.app.name
-  dashboard_region    = data.aws_region.current.id
+  dashboard_region    = data.aws_region.current.region
   dashboard_cluster   = aws_ecs_cluster.app.name
   dashboard_service   = aws_ecs_express_gateway_service.app.service_name
 

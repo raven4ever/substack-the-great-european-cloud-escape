@@ -51,12 +51,12 @@ resource "aws_ecs_express_gateway_service" "app" {
 
     environment {
       name  = "DYNAMODB_REGION"
-      value = data.aws_region.current.id
+      value = data.aws_region.current.region
     }
 
     environment {
       name  = "AWS_REGION"
-      value = data.aws_region.current.id
+      value = data.aws_region.current.region
     }
 
     environment {
@@ -71,7 +71,7 @@ resource "aws_ecs_express_gateway_service" "app" {
 
     environment {
       name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
-      value = format("https://xray.%s.amazonaws.com/v1/traces", data.aws_region.current.id)
+      value = format("https://xray.%s.amazonaws.com/v1/traces", data.aws_region.current.region)
     }
 
     environment {

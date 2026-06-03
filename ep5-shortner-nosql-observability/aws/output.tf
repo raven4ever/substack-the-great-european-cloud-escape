@@ -21,8 +21,8 @@ output "dashboard_url" {
   description = "Direct link to the CloudWatch dashboard."
   value = format(
     "https://%s.console.aws.amazon.com/cloudwatch/home?region=%s#dashboards:name=%s",
-    data.aws_region.current.id,
-    data.aws_region.current.id,
+    data.aws_region.current.region,
+    data.aws_region.current.region,
     aws_cloudwatch_dashboard.app.dashboard_name,
   )
 }

@@ -1,6 +1,6 @@
 resource "aws_vpc_ipam" "app" {
   operating_regions {
-    region_name = data.aws_region.current.id
+    region_name = data.aws_region.current.region
   }
 
   tags = {
@@ -12,7 +12,7 @@ resource "aws_vpc_ipam" "app" {
 resource "aws_vpc_ipam_pool" "regional" {
   address_family = "ipv4"
   ipam_scope_id  = aws_vpc_ipam.app.private_default_scope_id
-  locale         = data.aws_region.current.id
+  locale         = data.aws_region.current.region
 
   allocation_min_netmask_length = 16
   allocation_max_netmask_length = 16
