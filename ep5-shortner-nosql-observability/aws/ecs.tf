@@ -110,6 +110,12 @@ resource "aws_ecs_express_gateway_service" "app" {
     security_groups = [aws_security_group.app.id]
   }
 
+  # Express Mode auto-attaches its ALB-managed SG on top of the declared one.
+  # Refresh sees 2 SGs vs declared 1 → drift. Ignore the additional SG.
+  lifecycle {
+    ignore_changes = [network_configuration[0].security_groups]
+  }
+
   scaling_target {
     auto_scaling_metric       = "AVERAGE_CPU"
     auto_scaling_target_value = 50
