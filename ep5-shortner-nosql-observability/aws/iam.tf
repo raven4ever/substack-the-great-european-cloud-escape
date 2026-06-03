@@ -43,5 +43,5 @@ resource "aws_iam_role" "infrastructure" {
 
 resource "aws_iam_role_policy_attachment" "infrastructure_express" {
   role       = aws_iam_role.infrastructure.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonECSInfrastructureRoleforExpressGatewayServices"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSInfrastructureRoleforExpressGatewayServices"
 }
