@@ -42,12 +42,11 @@ resource "scaleway_container" "app" {
     # Scaleway resource IDs are <region>/<uuid>. Mongo private endpoint hostname
     # format: <instance_uuid>.<pn_uuid>.internal — region prefix stripped.
     MONGODB_URI = format(
-      "mongodb://%s:%s@%s.%s.internal:%v",
+      "mongodb://%s:%s@%s.%s.internal",
       scaleway_mongodb_instance.app.user_name,
       random_password.db_master.result,
       trimprefix(scaleway_mongodb_instance.app.id, format("%s/", data.scaleway_config.current.region)),
       trimprefix(scaleway_vpc_private_network.app.id, format("%s/", data.scaleway_config.current.region)),
-      scaleway_mongodb_instance.app.private_network[0].port,
     )
     MONGODB_TLS_CA             = scaleway_mongodb_instance.app.tls_certificate
     OTEL_EXPORTER_OTLP_HEADERS = format("Authorization=Bearer %s", scaleway_cockpit_token.app.secret_key)
