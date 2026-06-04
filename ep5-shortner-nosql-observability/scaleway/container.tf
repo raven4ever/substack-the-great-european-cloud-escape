@@ -42,7 +42,7 @@ resource "scaleway_container" "app" {
     # Scaleway resource IDs are <region>/<uuid>. Mongo private endpoint hostname
     # format: <instance_uuid>.<pn_uuid>.internal — region prefix stripped.
     MONGODB_URI = format(
-      "mongodb://%s:%s@%s.%s.internal",
+      "mongodb+srv://%s:%s@%s.%s.internal",
       scaleway_mongodb_instance.app.user_name,
       random_password.db_master.result,
       trimprefix(scaleway_mongodb_instance.app.id, format("%s/", data.scaleway_config.current.region)),
