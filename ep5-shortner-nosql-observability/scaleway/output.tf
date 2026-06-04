@@ -1,5 +1,5 @@
 locals {
-  app_url = format("https://%s", scaleway_container.app.domain_name)
+  app_url = scaleway_container.app.public_endpoint
 }
 
 output "app_url" {

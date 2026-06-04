@@ -16,8 +16,7 @@ resource "scaleway_container" "app" {
   min_scale = 1
   max_scale = 3
 
-  http_option = "redirected"
-  deploy      = true
+  https_connections_only = true
 
   # VPC integration for Serverless Containers is GA; the namespace-level
   # `activate_vpc_integration` flag is now always-true and deprecated, so we
