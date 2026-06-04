@@ -19,9 +19,5 @@ output "curl_commands" {
 
 output "dashboard_url" {
   description = "Direct link to the Cockpit Grafana dashboard."
-  value = format(
-    "https://%s.dashboard.cockpit.scaleway.com/d/%s",
-    data.scaleway_account_project.current.id,
-    grafana_dashboard.app.uid,
-  )
+  value       = format("%s/d/%s", data.scaleway_cockpit_grafana.main.grafana_url, grafana_dashboard.app.uid)
 }

@@ -33,11 +33,3 @@ variable "chaos_rate" {
   type        = string
   default     = "0.01"
 }
-
-# Grafana provider auth = Grafana SA token (NOT Scaleway IAM key).
-# Create SA + token in Cockpit Grafana UI, pass via TF_VAR_grafana_auth.
-variable "grafana_auth" {
-  description = "Grafana service account token for Cockpit Grafana API access."
-  type        = string
-  sensitive   = true
-}

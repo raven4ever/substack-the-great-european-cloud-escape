@@ -1,10 +1,40 @@
+# IAM-based Grafana auth via X-Auth-Token header (Scaleway IAM proxy pattern).
+# Grafana provider runs in anonymous mode; Scaleway IAM authenticates each request.
+resource "scaleway_iam_application" "grafana" {
+  name = format("%s-grafana", local.app_name)
+  tags = [local.project]
+}
+
+resource "scaleway_iam_policy" "grafana" {
+  name           = format("%s-grafana", local.app_name)
+  application_id = scaleway_iam_application.grafana.id
+
+  rule {
+    organization_id      = scaleway_iam_application.grafana.organization_id
+    permission_set_names = ["ObservabilityFullAccess"]
+  }
+}
+
+resource "scaleway_iam_api_key" "grafana" {
+  application_id = scaleway_iam_application.grafana.id
+  description    = "Terraform → Cockpit Grafana via X-Auth-Token"
+  expires_at     = time_rotating.iam_keys.rotation_rfc3339
+}
+
+# Per-project Cockpit Grafana endpoint URL.
+data "scaleway_cockpit_grafana" "main" {}
+
 # Cockpit pre-provisions Loki + Mimir + Tempo. Names stable, UIDs random.
 data "grafana_data_source" "metrics" {
   name = "Scaleway Metrics"
+
+  depends_on = [scaleway_iam_api_key.grafana]
 }
 
 data "grafana_data_source" "logs" {
   name = "Scaleway Logs"
+
+  depends_on = [scaleway_iam_api_key.grafana]
 }
 
 # Mimir metric names for serverless containers:

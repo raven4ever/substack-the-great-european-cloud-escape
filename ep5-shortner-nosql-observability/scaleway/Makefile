@@ -7,7 +7,7 @@ help:
 	@echo "Targets:"
 	@echo "  init     Download providers and modules"
 	@echo "  plan     Show what apply would do"
-	@echo "  apply    Build + push + deploy (needs TF_VAR_grafana_auth)"
+	@echo "  apply    Two-phase: Grafana IAM key first, then build + push + dashboard"
 	@echo "  destroy  Tear everything down"
 	@echo "  clean    Try destroy, then remove .terraform/ and state files"
 
@@ -17,8 +17,9 @@ init:
 plan:
 	$(TF) plan
 
-# Grafana SA token via TF_VAR_grafana_auth. Create SA in Cockpit Grafana UI first.
+# Two-phase: Grafana provider X-Auth-Token = apply-time IAM key secret.
 apply:
+	$(TF) apply $(AUTO) -target=scaleway_iam_api_key.grafana
 	$(TF) apply $(AUTO)
 
 destroy:

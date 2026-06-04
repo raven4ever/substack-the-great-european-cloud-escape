@@ -32,10 +32,16 @@ provider "docker" {
   }
 }
 
-# Grafana → Cockpit endpoint per project. auth = Grafana SA token from var.
-# Scaleway IAM keys are NOT Grafana credentials — create SA in Cockpit UI first.
+# Grafana → Cockpit. Anonymous mode + X-Auth-Token = Scaleway IAM secret.
+# Scaleway's IAM proxy auths; Grafana itself doesn't validate creds.
+# Pattern per scaleway_cockpit_grafana data source docs.
 provider "grafana" {
-  url     = format("https://%s.dashboard.cockpit.scaleway.com", data.scaleway_account_project.current.id)
-  auth    = var.grafana_auth
+  url  = data.scaleway_cockpit_grafana.main.grafana_url
+  auth = "anonymous"
+
+  http_headers = {
+    "X-Auth-Token" = scaleway_iam_api_key.grafana.secret_key
+  }
+
   retries = 5
 }
