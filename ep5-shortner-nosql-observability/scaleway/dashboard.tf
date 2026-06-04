@@ -1,9 +1,8 @@
-# Cockpit Grafana dashboard for ep5-shortner serverless container.
 # Two-phase apply: Grafana provider auth = apply-time IAM key secret.
 # Makefile runs `apply -target=scaleway_iam_api_key.grafana` first.
 
 # IAM-based Cockpit auth. scaleway_cockpit_grafana_user removed Jan 2026.
-# Scaleway now binds Grafana to IAM application via API key as bearer.
+# Grafana now binds via IAM application API key (bearer).
 resource "scaleway_iam_application" "grafana" {
   name = format("%s-grafana", local.app_name)
   tags = [local.project]
@@ -25,8 +24,7 @@ resource "scaleway_iam_api_key" "grafana" {
   expires_at     = time_rotating.iam_keys.rotation_rfc3339
 }
 
-# Cockpit pre-provisions Loki + Mimir + Tempo as Grafana datasources.
-# UIDs random, names stable: "Scaleway Metrics" (Mimir), "Scaleway Logs" (Loki).
+# Cockpit pre-provisions Loki + Mimir + Tempo. Names stable, UIDs random.
 data "grafana_data_source" "metrics" {
   name = "Scaleway Metrics"
 
@@ -39,27 +37,10 @@ data "grafana_data_source" "logs" {
   depends_on = [scaleway_iam_api_key.grafana]
 }
 
-# ---------------------------------------------------------------------------
-# Dashboard model. Built as nested HCL maps and rendered through `jsonencode`
-# so plan/apply diffs stay reviewable. 24-column grid, layout mirrors the
-# parallel AWS CloudWatch dashboard for visual parity in the article.
-#
-# Container CPU / memory metric names
-# -----------------------------------
-# Scaleway does not publish a stable list of Mimir metric names for serverless
-# containers. The Cockpit-bundled "Serverless Containers Overview" dashboard
-# emits queries against names of the form
-# `serverless_container_<dimension>_<unit>`; the closest matches discoverable
-# via `{__name__=~".+container.+(cpu|memory).+"}` in Grafana Explore are:
-#
-#   - serverless_container_cpu_seconds_total       (counter — rate over 1m)
-#   - serverless_container_memory_working_set_bytes (gauge)
-#
-# Both carry a `resource_name` label matching the container name. If your
-# project shows different names, update the `expr` below; the queries are
-# scoped to `resource_name="ep5-shortner"` so unrelated metrics are filtered
-# out either way.
-# ---------------------------------------------------------------------------
+# Mimir metric names for serverless containers:
+#   serverless_container_cpu_seconds_total       (counter)
+#   serverless_container_memory_working_set_bytes (gauge)
+# Both labeled `resource_name`. Discovery: `{__name__=~".+container.+(cpu|memory).+"}`.
 locals {
   dashboard_uid    = local.app_name
   dashboard_title  = format("%s observability", local.app_name)
@@ -68,7 +49,6 @@ locals {
   log_stream_label = format("{resource_name=\"%s\"}", local.app_name)
 
   dashboard_panels = [
-    # ---- Title banner ----------------------------------------------------
     {
       id    = 100
       type  = "text"
@@ -85,8 +65,6 @@ locals {
       }
     },
 
-    # ---- Row 1 ----------------------------------------------------------
-    # Panel 1: Requests per second by route
     {
       id    = 1
       type  = "timeseries"
@@ -108,7 +86,6 @@ locals {
       ]
     },
 
-    # Panel 2: Latency p50 / p95 / p99 — /r/:slug
     {
       id    = 2
       type  = "timeseries"
@@ -142,7 +119,7 @@ locals {
       ]
     },
 
-    # Panel 3: HTTP status distribution (stacked, one query per class)
+    # count_over_time (not rate) — units match AWS sum(is_*) per 1m bin.
     {
       id    = 3
       type  = "timeseries"
@@ -161,7 +138,6 @@ locals {
           }
         }
       }
-      # count_over_time, not rate, so units match the AWS sum(is_*) per 1m bin.
       targets = [
         {
           refId        = "A"
@@ -190,8 +166,6 @@ locals {
       ]
     },
 
-    # ---- Row 2 ----------------------------------------------------------
-    # Panel 4: Redirect outcomes (stacked)
     {
       id    = 4
       type  = "timeseries"
@@ -210,7 +184,6 @@ locals {
           }
         }
       }
-      # count_over_time, not rate, so units match the AWS sum(is_*) per 1m bin.
       targets = [
         {
           refId        = "OK"
@@ -233,7 +206,6 @@ locals {
       ]
     },
 
-    # Panel 7: Chaos injections fired
     {
       id    = 7
       type  = "timeseries"
@@ -245,7 +217,6 @@ locals {
         h = 6
       }
       datasource = { type = "loki", uid = local.loki_uid }
-      # count_over_time per 1m bin so the chart matches AWS's count() per 1m bin.
       targets = [
         {
           refId        = "A"
@@ -256,7 +227,6 @@ locals {
       ]
     },
 
-    # Panel 11: Links created rate
     {
       id    = 11
       type  = "timeseries"
@@ -278,8 +248,6 @@ locals {
       ]
     },
 
-    # ---- Row 3 ----------------------------------------------------------
-    # Panel 8: Cold starts (24h)
     {
       id    = 8
       type  = "timeseries"
@@ -292,7 +260,6 @@ locals {
       }
       datasource = { type = "loki", uid = local.loki_uid }
       timeFrom   = "24h"
-      # count_over_time per 5m bin so the chart matches AWS's count() per 5m bin.
       targets = [
         {
           refId        = "A"
@@ -303,7 +270,6 @@ locals {
       ]
     },
 
-    # Panel 9: Container CPU utilization (Mimir / Prometheus)
     {
       id    = 9
       type  = "timeseries"
@@ -325,7 +291,6 @@ locals {
       ]
     },
 
-    # Panel 10: Container memory utilization (Mimir / Prometheus)
     {
       id    = 10
       type  = "timeseries"
@@ -347,8 +312,6 @@ locals {
       ]
     },
 
-    # ---- Row 4 ----------------------------------------------------------
-    # Panel 6: Heartbeat liveness (last 5m) — single stat
     {
       id    = 6
       type  = "stat"
@@ -381,7 +344,6 @@ locals {
       }
     },
 
-    # Panel 5: Recent error-level logs (logs panel, full-width remainder)
     {
       id    = 5
       type  = "logs"

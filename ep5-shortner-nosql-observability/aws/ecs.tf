@@ -1,9 +1,5 @@
-# Choice: aws_ecs_express_gateway_service.
-# Express Mode (provider v6.23.0+) provisions the cluster-managed ALB,
-# security groups, target group, autoscaling, and a public HTTPS endpoint
-# on our behalf, removing ~10 resources of vanilla-Fargate boilerplate.
-# That is exactly the abstraction layer this article is about, so we use
-# it. Fargate launch type is implicit — Express Mode does not run on EC2.
+# Express Mode (aws_ecs_express_gateway_service, provider v6.23.0+).
+# Auto-provisions ALB + SGs + target group + autoscaling + HTTPS. Fargate implicit.
 
 resource "aws_ecs_cluster" "app" {
   name = format("%s-cluster", local.app_name)
@@ -105,10 +101,8 @@ resource "aws_ecs_express_gateway_service" "app" {
     }
   }
 
-  # Express Mode owns task networking. Provider treats security_groups as
-  # Computed: first plan = null, post-apply AWS returns the auto-attached SG.
-  # ignore_changes on the whole block absorbs the drift. Subnet changes also
-  # ignored post-create (acceptable — subnets stable after deploy).
+  # Express owns task networking. security_groups is Computed — auto-attached
+  # SG post-apply triggers drift. ignore_changes absorbs it (subnets stable).
   network_configuration {
     subnets = [aws_subnet.private_a.id, aws_subnet.private_b.id]
   }

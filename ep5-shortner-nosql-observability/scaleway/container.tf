@@ -8,8 +8,7 @@ resource "scaleway_container" "app" {
   name         = local.app_name
   namespace_id = scaleway_container_namespace.app.id
 
-  # Pull by digest so a new image build always rolls the deployment. Pinning to
-  # `:latest` would silently keep the old revision after a rebuild.
+  # Digest-pinned. :latest tag won't redeploy on rebuild.
   registry_image = format("%s@%s", local.app_image_repo, docker_registry_image.app.sha256_digest)
 
   port      = 8080
@@ -18,10 +17,8 @@ resource "scaleway_container" "app" {
 
   https_connections_only = true
 
-  # VPC integration for Serverless Containers is GA; the namespace-level
-  # `activate_vpc_integration` flag is now always-true and deprecated, so we
-  # only need `private_network_id` here. The container reaches Mongo via its
-  # PN-attached endpoint without traffic leaving the VPC.
+  # PN attachment → Mongo reachable without leaving VPC.
+  # Namespace-level activate_vpc_integration deprecated, always-true now.
   private_network_id = scaleway_vpc_private_network.app.id
 
   environment_variables = {
@@ -40,8 +37,7 @@ resource "scaleway_container" "app" {
     CHAOS_RATE                  = var.chaos_rate
   }
 
-  # Secrets: the Mongo URI carries the master password and the OTLP headers
-  # carry the Cockpit bearer token. Neither may surface in plain env vars.
+  # MONGODB_URI = master password. OTLP_HEADERS = Cockpit bearer. No plain env.
   secret_environment_variables = {
     MONGODB_URI = format(
       "mongodb://%s:%s@%s:%d",

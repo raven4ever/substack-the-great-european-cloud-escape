@@ -29,8 +29,7 @@ resource "aws_iam_role_policy" "app_task" {
   policy = data.aws_iam_policy_document.app_task_inline.json
 }
 
-# Express Mode infrastructure role: ECS itself assumes this to provision the
-# managed ALB, security groups, and autoscaling on our behalf.
+# Express infra role. ECS assumes it to provision ALB + SGs + autoscaling.
 resource "aws_iam_role" "infrastructure" {
   name               = format("%s-infrastructure", local.app_name)
   assume_role_policy = data.aws_iam_policy_document.ecs_infrastructure_assume_role.json

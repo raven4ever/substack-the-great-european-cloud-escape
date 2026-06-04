@@ -1,6 +1,4 @@
-# CloudWatch dashboard mirroring the panel set the parallel Scaleway agent
-# is shipping. Each widget body is built via jsonencode() so plan/apply
-# diffs stay readable instead of devolving into a single heredoc blob.
+# CloudWatch dashboard, panel set mirrors Scaleway/Cockpit for parity.
 
 locals {
   dashboard_log_group = aws_cloudwatch_log_group.app.name
@@ -9,7 +7,6 @@ locals {
   dashboard_service   = aws_ecs_express_gateway_service.app.service_name
 
   dashboard_widgets = [
-    # Title banner ----------------------------------------------------------
     {
       type   = "text"
       x      = 0
@@ -21,10 +18,7 @@ locals {
       }
     },
 
-    # Row 1 -----------------------------------------------------------------
-    # Panel 1: Requests per second by route
-    # `count() / 60` over a 1m bin yields requests-per-second so the chart's
-    # Y-axis matches the Scaleway dashboard's Loki rate() output.
+    # count() / 60 over 1m bin → RPS (matches Scaleway rate() units).
     {
       type   = "log"
       x      = 0
@@ -43,7 +37,6 @@ locals {
       }
     },
 
-    # Panel 2: Latency p50 / p95 / p99 — /r/:slug
     {
       type   = "log"
       x      = 8
@@ -62,11 +55,8 @@ locals {
       }
     },
 
-    # Panel 3: HTTP status distribution
-    # Logs Insights doesn't support C-ternary inside `stats ... by`, so we
-    # synthesize per-class boolean fields up front and sum them. Each boolean
-    # evaluates to 1/0 in the result set, so sum() gives the per-class count
-    # per 1m bin (count units, matches Scaleway's count_over_time output).
+    # Logs Insights rejects C-ternary in `stats ... by`. Synthesize per-class
+    # booleans (1/0), sum() per 1m bin. Matches Scaleway count_over_time units.
     {
       type   = "log"
       x      = 16
@@ -85,10 +75,7 @@ locals {
       }
     },
 
-    # Row 2 -----------------------------------------------------------------
-    # Panel 4: Redirect outcomes
-    # Same boolean-field workaround as panel 3 — Logs Insights can't ternary
-    # inside `stats ... by`. Counts per 1m bin (matches Scaleway count_over_time).
+    # Same boolean-field workaround as panel 3.
     {
       type   = "log"
       x      = 0
@@ -107,7 +94,6 @@ locals {
       }
     },
 
-    # Panel 7: Chaos injections fired
     {
       type   = "log"
       x      = 8
@@ -126,8 +112,7 @@ locals {
       }
     },
 
-    # Panel 11: Links created rate
-    # `count() / 60` over 1m bin → links/sec (matches Scaleway's rate() output).
+    # count() / 60 over 1m bin → links/sec (matches Scaleway rate() units).
     {
       type   = "log"
       x      = 16
@@ -146,8 +131,6 @@ locals {
       }
     },
 
-    # Row 3 -----------------------------------------------------------------
-    # Panel 8: Cold starts (24h)
     {
       type   = "log"
       x      = 0
@@ -167,7 +150,6 @@ locals {
       }
     },
 
-    # Panel 9: Container CPU utilization
     {
       type   = "metric"
       x      = 8
@@ -193,7 +175,6 @@ locals {
       }
     },
 
-    # Panel 10: Container memory utilization
     {
       type   = "metric"
       x      = 16
@@ -219,8 +200,7 @@ locals {
       }
     },
 
-    # Row 4 -----------------------------------------------------------------
-    # Panel 6: Heartbeat liveness (last 5m) — table acts as single-stat
+    # CloudWatch has no log-query single-stat. Table view = stand-in.
     {
       type   = "log"
       x      = 0
@@ -231,7 +211,6 @@ locals {
         title  = "Heartbeat liveness (last 5m)"
         region = local.dashboard_region
         view   = "table"
-        # 5 minutes in seconds, matches CloudWatch's relative time window.
         period = 300
         query = format(
           "SOURCE '%s' | fields @timestamp\n| filter kind = \"heartbeat\"\n| stats count() as heartbeats",
@@ -240,7 +219,6 @@ locals {
       }
     },
 
-    # Panel 5: Recent error-level logs (full-width table to the right)
     {
       type   = "log"
       x      = 8
@@ -263,9 +241,7 @@ locals {
 resource "aws_cloudwatch_dashboard" "app" {
   dashboard_name = local.app_name
 
-  # `start = "-PT1H"` and `periodOverride = "auto"` make the default view a
-  # rolling 1-hour window with auto-resolution, matching Scaleway's
-  # `time = { from = "now-1h" }` and `refresh = "30s"`.
+  # start=-PT1H + periodOverride=auto → rolling 1h default, matches Scaleway.
   dashboard_body = jsonencode({
     start          = "-PT1H"
     periodOverride = "auto"

@@ -32,9 +32,8 @@ provider "docker" {
   }
 }
 
-# Grafana provider → per-project Cockpit endpoint. URL derived from project ID.
-# auth = IAM API key secret (bearer). secret_key is apply-time computed →
-# two-phase apply on first run (Makefile + dashboard.tf).
+# Grafana → Cockpit endpoint per project. Bearer = IAM key secret_key.
+# secret_key apply-time computed → two-phase apply (see Makefile + dashboard.tf).
 provider "grafana" {
   url  = format("https://%s.dashboard.cockpit.scaleway.com", data.scaleway_account_project.current.id)
   auth = scaleway_iam_api_key.grafana.secret_key

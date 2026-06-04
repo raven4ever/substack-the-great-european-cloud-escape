@@ -19,8 +19,7 @@ resource "scaleway_iam_policy" "registry_push" {
   }
 }
 
-# Shared rotation source for any IAM API keys this module owns. The Scaleway
-# provider has required `expires_at` on scaleway_iam_api_key since v2.40.
+# Shared rotation for IAM API keys. expires_at required since provider v2.40.
 resource "time_rotating" "iam_keys" {
   rotation_years = 1
 }

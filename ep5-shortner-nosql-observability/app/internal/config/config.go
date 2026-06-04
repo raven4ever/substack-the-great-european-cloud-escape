@@ -143,8 +143,7 @@ func parseLogLevel(s string) slog.Level {
 	}
 }
 
-// parseHeaders parses a comma-separated "k1=v1,k2=v2" string into a map.
-// Matches the OTEL_EXPORTER_OTLP_HEADERS convention.
+// parseHeaders parses "k1=v1,k2=v2" per OTEL_EXPORTER_OTLP_HEADERS convention.
 func parseHeaders(s string) map[string]string {
 	out := map[string]string{}
 	if s == "" {

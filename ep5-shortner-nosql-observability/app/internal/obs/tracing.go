@@ -29,16 +29,10 @@ import (
 
 const awsXRayService = "xray"
 
-// InitTracing initializes the global OpenTelemetry tracer provider according
-// to cfg.TraceExporter and returns a shutdown function that flushes any
-// pending spans. The returned shutdown is always safe to call, even when
-// tracing is disabled.
-//
-// Modes:
-//   - "none": installs a no-op TracerProvider; shutdown is a no-op.
-//   - "otlp": OTLP/HTTP exporter, optionally authenticated via cfg.OTLPHeaders
-//     (e.g. a bearer token for Scaleway Cockpit).
-//   - "xray":  OTLP/HTTP exporter with each request SigV4-signed for AWS X-Ray.
+// InitTracing installs the global OTel tracer per cfg.TraceExporter and returns
+// a shutdown that flushes pending spans. Shutdown is always safe to call.
+// Modes: "none" = noop; "otlp" = OTLP/HTTP (+ optional headers); "xray" =
+// OTLP/HTTP with SigV4-signed requests for AWS X-Ray.
 func InitTracing(ctx context.Context, cfg *config.Config) (func(context.Context) error, error) {
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{},

@@ -13,8 +13,7 @@ resource "scaleway_mongodb_instance" "app" {
   volume_size_in_gb            = 5
   is_snapshot_schedule_enabled = false
 
-  # Attach to the Private Network so the serverless container can reach Mongo
-  # without traffic leaving the VPC. This is the whole point of the article.
+  # PN attached → container reaches Mongo without leaving VPC.
   private_network {
     pn_id = scaleway_vpc_private_network.app.id
   }
