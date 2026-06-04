@@ -3,14 +3,10 @@ FROM golang:1.26-alpine AS builder
 WORKDIR /src
 
 # templ CLI version must match go.mod runtime lib.
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg/mod \
-    go install github.com/a-h/templ/cmd/templ@v0.3.1020
+RUN go install github.com/a-h/templ/cmd/templ@v0.3.1020
 
 COPY go.mod go.sum ./
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg/mod \
-    go mod download
+RUN go mod download
 
 COPY . .
 
@@ -24,9 +20,7 @@ RUN addgroup -g 65532 -S nonroot \
 # Hardcoded linux/amd64. docker.tf pins platform; no cross-arch flexibility needed.
 # CGO_ENABLED=0 + -ldflags -s -w + -trimpath. Static, stripped, reproducible.
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-RUN --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg/mod \
-    go build \
+RUN go build \
         -trimpath \
         -ldflags="-s -w" \
         -o /out/server \
