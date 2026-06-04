@@ -28,7 +28,7 @@ resource "scaleway_iam_api_key" "grafana" {
 # queries race the key activation and timeout with context deadline exceeded.
 resource "time_sleep" "grafana_propagation" {
   depends_on      = [scaleway_iam_api_key.grafana]
-  create_duration = "30s"
+  create_duration = "60s"
 }
 
 # Cockpit pre-provisions Loki + Mimir + Tempo. Names stable, UIDs random.

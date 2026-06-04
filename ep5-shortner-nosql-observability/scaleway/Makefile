@@ -21,7 +21,7 @@ plan:
 # (apply-time computed). Phase 1 mints the IAM key so provider can self-configure.
 # Phase 2 applies everything else, including the dashboard.
 apply:
-	$(TF) apply $(AUTO) -target=scaleway_iam_api_key.grafana
+	$(TF) apply $(AUTO) -target=scaleway_iam_api_key.grafana -target=time_sleep.grafana_propagation
 	$(TF) apply $(AUTO)
 
 destroy:
