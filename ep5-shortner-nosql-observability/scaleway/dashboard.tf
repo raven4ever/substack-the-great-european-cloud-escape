@@ -24,19 +24,6 @@ resource "scaleway_iam_api_key" "grafana" {
 # Per-project Cockpit Grafana endpoint URL.
 data "scaleway_cockpit_grafana" "main" {}
 
-# Cockpit pre-provisions Loki + Mimir + Tempo. Names stable, UIDs random.
-data "grafana_data_source" "metrics" {
-  name = format("Scaleway Metrics - %s", data.scaleway_config.current.region)
-
-  depends_on = [scaleway_iam_api_key.grafana]
-}
-
-data "grafana_data_source" "logs" {
-  name = format("Scaleway Logs - %s", data.scaleway_config.current.region)
-
-  depends_on = [scaleway_iam_api_key.grafana]
-}
-
 # Mimir metric names for serverless containers:
 #   serverless_container_cpu_seconds_total       (counter)
 #   serverless_container_memory_working_set_bytes (gauge)
@@ -44,8 +31,8 @@ data "grafana_data_source" "logs" {
 locals {
   dashboard_uid    = local.app_name
   dashboard_title  = format("%s observability", local.app_name)
-  loki_uid         = data.grafana_data_source.logs.uid
-  mimir_uid        = data.grafana_data_source.metrics.uid
+  loki_uid         = format("Scaleway Logs - %s", data.scaleway_config.current.region)
+  mimir_uid        = format("Scaleway Metrics - %s", data.scaleway_config.current.region)
   log_stream_label = format("{resource_name=\"%s\"}", local.app_name)
 
   dashboard_panels = [
