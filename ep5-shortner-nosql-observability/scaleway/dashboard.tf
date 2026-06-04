@@ -24,17 +24,24 @@ resource "scaleway_iam_api_key" "grafana" {
   expires_at     = time_rotating.iam_keys.rotation_rfc3339
 }
 
+# Scaleway IAM propagation lag (~30s). Without delay, Grafana data source
+# queries race the key activation and timeout with context deadline exceeded.
+resource "time_sleep" "grafana_propagation" {
+  depends_on      = [scaleway_iam_api_key.grafana]
+  create_duration = "30s"
+}
+
 # Cockpit pre-provisions Loki + Mimir + Tempo. Names stable, UIDs random.
 data "grafana_data_source" "metrics" {
   name = "Scaleway Metrics"
 
-  depends_on = [scaleway_iam_api_key.grafana]
+  depends_on = [time_sleep.grafana_propagation]
 }
 
 data "grafana_data_source" "logs" {
   name = "Scaleway Logs"
 
-  depends_on = [scaleway_iam_api_key.grafana]
+  depends_on = [time_sleep.grafana_propagation]
 }
 
 # Mimir metric names for serverless containers:
