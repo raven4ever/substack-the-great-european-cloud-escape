@@ -1,11 +1,9 @@
 resource "docker_image" "app" {
   name     = local.app_image_tag
-  platform = "linux/amd64"
 
   build {
     context    = format("%s/../app", path.module)
     dockerfile = "Dockerfile"
-    platform   = "linux/amd64"
     tag        = [local.app_image_tag]
 
     label = {

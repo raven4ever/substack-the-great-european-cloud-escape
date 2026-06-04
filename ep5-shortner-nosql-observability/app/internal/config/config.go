@@ -21,6 +21,7 @@ type Config struct {
 	MongoDBURI        string
 	MongoDBDatabase   string
 	MongoDBCollection string
+	MongoDBTLSCA      string // PEM CA cert; if non-empty, mongo client uses TLS
 
 	DefaultTTL time.Duration
 
@@ -48,6 +49,7 @@ func Load() (*Config, error) {
 		MongoDBURI:         getStr("MONGODB_URI", "mongodb://localhost:27017"),
 		MongoDBDatabase:    getStr("MONGODB_DATABASE", "shortner"),
 		MongoDBCollection:  getStr("MONGODB_COLLECTION", "links"),
+		MongoDBTLSCA:       getStr("MONGODB_TLS_CA", ""),
 		DefaultTTL:         getDuration("DEFAULT_TTL", 24*time.Hour),
 		TraceExporter:      strings.ToLower(getStr("TRACE_EXPORTER", "none")),
 		OTLPEndpoint:       getStr("OTEL_EXPORTER_OTLP_ENDPOINT", ""),

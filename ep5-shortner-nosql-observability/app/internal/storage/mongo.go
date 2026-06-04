@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"time"
@@ -25,14 +27,22 @@ type mongoDoc struct {
 	ClickCount int64      `bson:"click_count"`
 }
 
-func NewMongoStore(ctx context.Context, uri, dbName, collName string) (*MongoStore, error) {
+func NewMongoStore(ctx context.Context, uri, dbName, collName, caPEM string) (*MongoStore, error) {
 	if uri == "" {
 		return nil, errors.New("mongodb uri is required")
 	}
 	if dbName == "" || collName == "" {
 		return nil, errors.New("mongodb database and collection are required")
 	}
-	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+	clientOpts := options.Client().ApplyURI(uri)
+	if caPEM != "" {
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM([]byte(caPEM)) {
+			return nil, errors.New("mongodb tls ca: no certs parsed from PEM")
+		}
+		clientOpts.SetTLSConfig(&tls.Config{RootCAs: pool, MinVersion: tls.VersionTLS12})
+	}
+	client, err := mongo.Connect(clientOpts)
 	if err != nil {
 		return nil, fmt.Errorf("connect mongo: %w", err)
 	}

@@ -8,8 +8,9 @@ resource "scaleway_container" "app" {
   name         = local.app_name
   namespace_id = scaleway_container_namespace.app.id
 
-  # Digest-pinned. :latest tag won't redeploy on rebuild.
-  image = format("%s@%s", local.app_image_repo, docker_registry_image.app.sha256_digest)
+  # TEMP: by tag (was @digest). Digest reference returns "image not found"
+  # in registry — likely push pushes only manifest. Re-evaluate later.
+  image = local.app_image_tag
 
   port      = 8080
   min_scale = 1
@@ -38,13 +39,17 @@ resource "scaleway_container" "app" {
 
   # MONGODB_URI = master password. OTLP_HEADERS = Cockpit bearer. No plain env.
   secret_environment_variables = {
+    # Scaleway resource IDs are <region>/<uuid>. Mongo private endpoint hostname
+    # format: <instance_uuid>.<pn_uuid>.internal — region prefix stripped.
     MONGODB_URI = format(
-      "mongodb://%s:%s@%s:%d",
+      "mongodb://%s:%s@%s.%s.internal:%v",
       scaleway_mongodb_instance.app.user_name,
       random_password.db_master.result,
-      scaleway_mongodb_instance.app.private_network[0].dns_records[0],
+      trimprefix(scaleway_mongodb_instance.app.id, format("%s/", data.scaleway_config.current.region)),
+      trimprefix(scaleway_vpc_private_network.app.id, format("%s/", data.scaleway_config.current.region)),
       scaleway_mongodb_instance.app.private_network[0].port,
     )
+    MONGODB_TLS_CA             = scaleway_mongodb_instance.app.tls_certificate
     OTEL_EXPORTER_OTLP_HEADERS = format("Authorization=Bearer %s", scaleway_cockpit_token.app.secret_key)
   }
 

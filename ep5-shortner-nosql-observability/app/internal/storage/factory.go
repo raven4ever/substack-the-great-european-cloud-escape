@@ -19,7 +19,7 @@ func New(ctx context.Context, cfg *config.Config) (Store, error) {
 		}
 		return store, nil
 	case "mongodb":
-		store, err := NewMongoStore(ctx, cfg.MongoDBURI, cfg.MongoDBDatabase, cfg.MongoDBCollection)
+		store, err := NewMongoStore(ctx, cfg.MongoDBURI, cfg.MongoDBDatabase, cfg.MongoDBCollection, cfg.MongoDBTLSCA)
 		if err != nil {
 			return nil, fmt.Errorf("init mongodb: %w", err)
 		}
