@@ -1,9 +1,5 @@
 FROM golang:1.26-alpine AS builder
 
-ARG TEMPL_VERSION
-ARG TARGETOS
-ARG TARGETARCH
-
 WORKDIR /src
 
 # templ CLI version must match go.mod runtime lib.
@@ -25,11 +21,11 @@ RUN templ generate
 RUN addgroup -g 65532 -S nonroot \
     && adduser  -u 65532 -S -G nonroot -H -D nonroot
 
+# Hardcoded linux/amd64. docker.tf pins platform; no cross-arch flexibility needed.
 # CGO_ENABLED=0 + -ldflags -s -w + -trimpath. Static, stripped, reproducible.
-ENV CGO_ENABLED=0
+ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
-    GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build \
         -trimpath \
         -ldflags="-s -w" \
