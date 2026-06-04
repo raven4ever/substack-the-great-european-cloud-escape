@@ -26,13 +26,13 @@ data "scaleway_cockpit_grafana" "main" {}
 
 # Cockpit pre-provisions Loki + Mimir + Tempo. Names stable, UIDs random.
 data "grafana_data_source" "metrics" {
-  name = format("Scaleway Metrics - %s", scaleway_vpc_private_network.app.region)
+  name = format("Scaleway Metrics - %s", data.scaleway_config.current.region)
 
   depends_on = [scaleway_iam_api_key.grafana]
 }
 
 data "grafana_data_source" "logs" {
-  name = format("Scaleway Logs - %s", scaleway_vpc_private_network.app.region)
+  name = format("Scaleway Logs - %s", data.scaleway_config.current.region)
 
   depends_on = [scaleway_iam_api_key.grafana]
 }
