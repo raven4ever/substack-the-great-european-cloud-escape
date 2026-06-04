@@ -36,7 +36,7 @@ provider "docker" {
 # Scaleway's IAM proxy auths; Grafana itself doesn't validate creds.
 # Pattern per scaleway_cockpit_grafana data source docs.
 provider "grafana" {
-  url  = data.scaleway_cockpit_grafana.main.grafana_url
+  url  = trimsuffix(data.scaleway_cockpit_grafana.main.grafana_url, "/")
   auth = "anonymous"
 
   http_headers = {
