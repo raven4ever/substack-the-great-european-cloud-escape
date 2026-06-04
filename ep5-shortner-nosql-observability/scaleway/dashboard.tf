@@ -14,7 +14,7 @@ resource "scaleway_iam_policy" "grafana" {
 
   rule {
     organization_id      = scaleway_iam_application.grafana.organization_id
-    permission_set_names = ["CockpitFullAccess"]
+    permission_set_names = ["ObservabilityGrafanaEditor"]
   }
 }
 

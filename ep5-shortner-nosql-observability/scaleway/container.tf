@@ -9,7 +9,7 @@ resource "scaleway_container" "app" {
   namespace_id = scaleway_container_namespace.app.id
 
   # Digest-pinned. :latest tag won't redeploy on rebuild.
-  registry_image = format("%s@%s", local.app_image_repo, docker_registry_image.app.sha256_digest)
+  image = format("%s@%s", local.app_image_repo, docker_registry_image.app.sha256_digest)
 
   port      = 8080
   min_scale = 1
@@ -31,7 +31,6 @@ resource "scaleway_container" "app" {
     LOG_LEVEL                   = var.log_level
     APP_NAME                    = local.app_name
     APP_VERSION                 = var.app_version
-    PORT                        = "8080"
     HEARTBEAT_INTERVAL          = var.heartbeat_interval
     HEARTBEAT_PAYLOAD_KB        = var.heartbeat_payload_kb
     CHAOS_RATE                  = var.chaos_rate
