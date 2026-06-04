@@ -1,47 +1,10 @@
-# Two-phase apply: Grafana provider auth = apply-time IAM key secret.
-# Makefile runs `apply -target=scaleway_iam_api_key.grafana` first.
-
-# IAM-based Cockpit auth. scaleway_cockpit_grafana_user removed Jan 2026.
-# Grafana now binds via IAM application API key (bearer).
-resource "scaleway_iam_application" "grafana" {
-  name = format("%s-grafana", local.app_name)
-  tags = [local.project]
-}
-
-resource "scaleway_iam_policy" "grafana" {
-  name           = format("%s-grafana", local.app_name)
-  application_id = scaleway_iam_application.grafana.id
-
-  rule {
-    organization_id      = scaleway_iam_application.grafana.organization_id
-    permission_set_names = ["ObservabilityFullAccess"]
-  }
-}
-
-resource "scaleway_iam_api_key" "grafana" {
-  application_id = scaleway_iam_application.grafana.id
-  description    = "Terraform → Cockpit Grafana provider auth"
-  expires_at     = time_rotating.iam_keys.rotation_rfc3339
-}
-
-# Scaleway IAM propagation lag (~30s). Without delay, Grafana data source
-# queries race the key activation and timeout with context deadline exceeded.
-resource "time_sleep" "grafana_propagation" {
-  depends_on      = [scaleway_iam_api_key.grafana]
-  create_duration = "60s"
-}
-
 # Cockpit pre-provisions Loki + Mimir + Tempo. Names stable, UIDs random.
 data "grafana_data_source" "metrics" {
   name = "Scaleway Metrics"
-
-  depends_on = [time_sleep.grafana_propagation]
 }
 
 data "grafana_data_source" "logs" {
   name = "Scaleway Logs"
-
-  depends_on = [time_sleep.grafana_propagation]
 }
 
 # Mimir metric names for serverless containers:
